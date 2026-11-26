@@ -146,13 +146,12 @@ public class MainActivity extends Activity {
                 || u.contains("gsi/status");
     }
 
-    /** 用 Custom Tabs 打开，失败则退回系统浏览器 */
+    /** 用系统浏览器 / Custom Tabs 打开登录页 */
     private void openCustomTab(String url) {
+        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        i.addCategory(Intent.CATEGORY_BROWSABLE);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
-            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            i.addCategory(Intent.CATEGORY_BROWSABLE);
-            i.putExtra("android.support.customtabs.extra.SESSION", (android.os.IBinder) null);
-            i.putExtra("android.support.customtabs.extra.EXTRA_ENABLE_INSTANT_APPS", true);
             startActivity(i);
         } catch (Exception e) {
             try {
