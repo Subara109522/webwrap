@@ -52,6 +52,12 @@ public class MainActivity extends Activity {
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
+
+        // 伪装成桌面级 Chrome，绕过 Google OAuth 对 WebView 的登录封锁
+        String chromeUA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 "
+                + "(KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36";
+        s.setUserAgentString(chromeUA);
+
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
         s.setLoadWithOverviewMode(true);
