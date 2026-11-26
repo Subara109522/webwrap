@@ -53,11 +53,6 @@ public class MainActivity extends Activity {
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
 
-        // 伪装成桌面级 Chrome，绕过 Google OAuth 对 WebView 的登录封锁
-        String chromeUA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 "
-                + "(KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36";
-        s.setUserAgentString(chromeUA);
-
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
         s.setLoadWithOverviewMode(true);
@@ -84,6 +79,13 @@ public class MainActivity extends Activity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
+
+                // Google 登录相关域名一律交给 Custom Tabs（真实浏览器内核）
+                if (isGoogleAuthUrl(url)) {
+                    openCustomTab(url);
+                    return true;
+                }
+
                 if (url.startsWith("http://") || url.startsWith("https://")) {
                     view.loadUrl(url);
                     return true;
@@ -129,6 +131,35 @@ public class MainActivity extends Activity {
         });
 
         loadStartUrl();
+    }
+
+    /** 判断是否为 Google OAuth 登录相关地址 */
+    private boolean isGoogleAuthUrl(String url) {
+        if (url == null) return false;
+        String u = url.toLowerCase();
+        return u.contains("accounts.google.com")
+                || u.contains("accounts.youtube.com")
+                || u.contains("/o/oauth2/")
+                || u.contains("oauth2/auth")
+                || u.contains("signin/v2")
+                || u.contains("ServiceLogin")
+                || u.contains("gsi/status");
+    }
+
+    /** 用 Custom Tabs 打开，失败则退回系统浏览器 */
+    private void openCustomTab(String url) {
+        try {
+            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            i.addCategory(Intent.CATEGORY_BROWSABLE);
+            i.putExtra("android.support.customtabs.extra.SESSION", (android.os.IBinder) null);
+            i.putExtra("android.support.customtabs.extra.EXTRA_ENABLE_INSTANT_APPS", true);
+            startActivity(i);
+        } catch (Exception e) {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     private void showMenu() {
