@@ -1,0 +1,13 @@
+# 忽略编译产物
+*.iml
+.gradle/
+local.properties
+.idea/
+build/
+captures/
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.jks
+!keystore.jks
